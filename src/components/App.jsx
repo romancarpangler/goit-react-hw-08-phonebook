@@ -1,21 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectlsLoggedIn } from 'redux/selector';
+import { useDispatch } from 'react-redux';
 import { refreshUser } from '../operations';
-import { selectIsRefresh } from 'redux/selector';
 import { PrivateRout } from './privateRout';
 import { RestrictedRoute } from './restrictedRoute';
-import Navigation from './navigation';
-import Register from './register';
-import Login from './login';
-import WraperContacts from './wraperContacts';
+
+const Navigation = lazy(() => import('./navigation'));
+const Register = lazy(() => import('./register'));
+const Login = lazy(() => import('./login'));
+const WraperContacts = lazy(() => import('./wraperContacts'));
 
 export const App = () => {
   const dispath = useDispatch();
-
-  const isLoggetIn = useSelector(selectlsLoggedIn);
-  const isREfresh = useSelector(selectIsRefresh);
 
   useEffect(() => {
     dispath(refreshUser());
@@ -23,23 +19,18 @@ export const App = () => {
 
   return (
     <>
-      <>
+      <Suspense>
         <div style={{ display: 'flex' }}>
           <Navigation />
         </div>
 
         <Routes>
-          {isLoggetIn && !isREfresh && (
-            <Route
-              path="/contacts"
-              element={
-                <PrivateRout
-                  component={<WraperContacts />}
-                  redirectTo="/login"
-                />
-              }
-            ></Route>
-          )}
+          <Route
+            path="/contacts"
+            element={
+              <PrivateRout component={<WraperContacts />} redirectTo="/login" />
+            }
+          ></Route>
 
           <Route
             path="/login"
@@ -56,9 +47,9 @@ export const App = () => {
               />
             }
           ></Route>
-          <Route path="*" element={<Register />}></Route>
+          <Route path="*" element={<Login />}></Route>
         </Routes>
-      </>
+      </Suspense>
     </>
   );
 };
