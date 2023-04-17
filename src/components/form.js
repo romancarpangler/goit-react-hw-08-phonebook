@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from '../operations';
+import { selectContacts } from '../redux/selector';
 
 const FormAddcontacts = () => {
   const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
 
   const [name, setName] = useState('');
   const [number, setNumber] = useState(0);
@@ -22,6 +24,26 @@ const FormAddcontacts = () => {
     }
   };
 
+  const checkingContacts = name => {
+    return contacts.some(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    const isContactsInclude = checkingContacts(name);
+
+    if (isContactsInclude) {
+      alert(`${name} is alredy in contacts.`);
+      return;
+    }
+
+    dispatch(addContact(data));
+
+    event.currentTarget.reset();
+  };
+
   const data = {
     name: name,
     number: number,
@@ -31,13 +53,7 @@ const FormAddcontacts = () => {
     <div style={{ padding: 20, paddingBottom: 0 }}>
       <h1>Phonebook</h1>
 
-      <form
-        onSubmit={event => {
-          event.preventDefault();
-          dispatch(addContact(data));
-          event.currentTarget.reset();
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         <label style={{ display: 'block', margin: 20 }}>
           Name
           <input
